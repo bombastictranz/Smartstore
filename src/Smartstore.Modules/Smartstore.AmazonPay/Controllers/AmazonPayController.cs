@@ -35,6 +35,7 @@ namespace Smartstore.AmazonPay.Controllers
         private readonly ICheckoutStateAccessor _checkoutStateAccessor;
         private readonly IOrderProcessingService _orderProcessingService;
         private readonly IOrderCalculationService _orderCalculationService;
+        private readonly ICheckoutWorkflow _checkoutWorkflow;
         private readonly IPaymentService _paymentService;
         private readonly IRoundingHelper _roundingHelper;
         private readonly AmazonPaySettings _settings;
@@ -49,6 +50,7 @@ namespace Smartstore.AmazonPay.Controllers
             ICheckoutStateAccessor checkoutStateAccessor,
             IOrderProcessingService orderProcessingService,
             IOrderCalculationService orderCalculationService,
+            ICheckoutWorkflow checkoutWorkflow,
             IPaymentService paymentService,
             IRoundingHelper roundingHelper,
             AmazonPaySettings amazonPaySettings,
@@ -62,6 +64,7 @@ namespace Smartstore.AmazonPay.Controllers
             _checkoutStateAccessor = checkoutStateAccessor;
             _orderProcessingService = orderProcessingService;
             _orderCalculationService = orderCalculationService;
+            _checkoutWorkflow = checkoutWorkflow;
             _paymentService = paymentService;
             _roundingHelper = roundingHelper;
             _settings = amazonPaySettings;
@@ -148,11 +151,16 @@ namespace Smartstore.AmazonPay.Controllers
         {
             try
             {
-                var result = await ProcessCheckoutReview(amazonCheckoutSessionId);
-
-                if (result.Success)
+                var review = await ProcessCheckoutReview(amazonCheckoutSessionId);
+                if (review.Success)
                 {
-                    var actionName = result.IsShippingMethodMissing
+                    var result = await _checkoutWorkflow.AdvanceAsync();
+                    if (result.ActionResult != null)
+                    {
+                        return result.ActionResult;
+                    }
+
+                    var actionName = review.IsShippingMethodMissing
                         ? nameof(CheckoutController.ShippingMethod)
                         : nameof(CheckoutController.Confirm);
 
@@ -191,7 +199,7 @@ namespace Smartstore.AmazonPay.Controllers
                 return result;
             }
 
-            if (!_orderSettings.AnonymousCheckoutAllowed && customer.IsGuest())
+            if (!_orderSettings.AnonymousCheckoutAllowed && !customer.IsRegistered())
             {
                 NotifyWarning(T("Checkout.AnonymousNotAllowed"));
                 return result;
@@ -286,11 +294,11 @@ namespace Smartstore.AmazonPay.Controllers
                 _checkoutStateAccessor.CheckoutState.PaymentSummary = string.Join(", ", session.PaymentPreferences.Select(x => x.PaymentDescriptor));
             }
 
-            if (!HttpContext.Session.TryGetObject<ProcessPaymentRequest>("OrderPaymentInfo", out var paymentRequest)
+            if (!HttpContext.Session.TryGetObject<ProcessPaymentRequest>(CheckoutState.OrderPaymentInfoName, out var paymentRequest)
                 || paymentRequest == null
                 || paymentRequest.OrderGuid == Guid.Empty)
             {
-                HttpContext.Session.TrySetObject("OrderPaymentInfo", new ProcessPaymentRequest { OrderGuid = Guid.NewGuid() });
+                HttpContext.Session.TrySetObject(CheckoutState.OrderPaymentInfoName, new ProcessPaymentRequest { OrderGuid = Guid.NewGuid() });
             }
 
             return result;
@@ -318,7 +326,7 @@ namespace Smartstore.AmazonPay.Controllers
                     throw new AmazonPayException(T("Payment.MissingCheckoutState", "AmazonPayCheckoutState." + nameof(state.SessionId)));
                 }
 
-                if (!HttpContext.Session.TryGetObject<ProcessPaymentRequest>("OrderPaymentInfo", out var paymentRequest) || paymentRequest == null)
+                if (!HttpContext.Session.TryGetObject<ProcessPaymentRequest>(CheckoutState.OrderPaymentInfoName, out var paymentRequest) || paymentRequest == null)
                 {
                     paymentRequest = new ProcessPaymentRequest();
                 }

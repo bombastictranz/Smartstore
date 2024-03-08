@@ -4,6 +4,7 @@ using Smartstore.Core.Checkout.Attributes;
 using Smartstore.Core.Checkout.Cart;
 using Smartstore.Core.Checkout.GiftCards;
 using Smartstore.Core.Checkout.Orders;
+using Smartstore.Core.Checkout.Orders.Handlers;
 using Smartstore.Core.Checkout.Payment;
 using Smartstore.Core.Checkout.Payment.Rules;
 using Smartstore.Core.Checkout.Rules;
@@ -54,6 +55,14 @@ namespace Smartstore.Core.Bootstrapping
             builder.RegisterType<OrderService>().As<IOrderService>().InstancePerLifetimeScope();
             builder.RegisterType<TaxService>().As<ITaxService>().InstancePerLifetimeScope();
             builder.RegisterType<TaxCalculator>().As<ITaxCalculator>().InstancePerLifetimeScope();
+
+            // Checkout
+            builder.RegisterType<CheckoutWorkflow>().As<ICheckoutWorkflow>().InstancePerLifetimeScope();
+            builder.RegisterType<BillingAddressHandler>().As<ICheckoutHandler>().InstancePerLifetimeScope();
+            builder.RegisterType<ShippingAddressHandler>().As<ICheckoutHandler>().InstancePerLifetimeScope();
+            builder.RegisterType<ShippingMethodHandler>().As<ICheckoutHandler>().InstancePerLifetimeScope();
+            builder.RegisterType<PaymentMethodHandler>().As<ICheckoutHandler>().InstancePerLifetimeScope();
+            builder.RegisterType<ConfirmHandler>().As<ICheckoutHandler>().InstancePerLifetimeScope();
 
             // Cart rules.
             var cartRuleTypes = appContext.TypeScanner.FindTypes<IRule<CartRuleContext>>().ToList();

@@ -18,6 +18,8 @@
 - Import news from RSS news feeds.
 - #971 Add a cart rule to check if the current customer is authenticated with a certain external authentication method.
 - Reverse proxy: added support for `X-Forwarded-Prefix` header (for `PathBase` resolution)
+- Page Builder
+	- Added **AudioPlayer** block
 
 ### Improvements
 
@@ -46,6 +48,9 @@
 - #965 Prevent adding of products to the shopping cart by system customers such as *builtin@search-engine-record.com*.
 - Increased the default maximum file size of an avatar and added a customer setting for this in backend.
 - Stripe: Update shipping address on confirm order.
+- Addresses: make first and last name optional if a company name has been specified.
+- #1012 Estimate shipping costs without rules if no shipping method was found with rules.
+- PayPal: Orders were cancled when capturing was declined, now they are being voided instead.
 
 ### Bugfixes
 
@@ -56,10 +61,12 @@
 - #996 Limited to customer roles is not working for topics that are displayed as widgets.
 - #914 Featured sorting on category and manufacturer pages not applied when using standard search.
 - Product attributes are lost when navigating to *Ask Question* page multiple times.
+- #1024 Apply preselected options of required attributes of added products when required products are automatically added to shopping cart.
 - Fixed a product can only be added to the shopping cart with a quantity of 1 if the stock quantity is below 0.
 - #957 Fixed prices should not be hidden if the *Access Shopping Cart* permission has not been granted.
 - Fixed `NullReferenceException` calling search page without any search term.
-- Fixes `NullReferenceException` *typeFilter was null* when uploading a video.
+- Fixed `NullReferenceException` *typeFilter was null* when uploading a video.
+- Fixed `NullReferenceException` on product detail page if the main menu is not published.
 - Tax by region: fixed tax rate was not applied if asterisk placeholder character was saved for zip code.
 - #921 IOException "The filename, directory name, or volume label syntax is incorrect" when `MediaSettings.AppendFileVersionToUrl` is activated.
 - #922 Newsletter subscription event not triggered upon email confirmation.
@@ -87,6 +94,8 @@
 - Fixed *QuantityBelowStoreOwnerNotification* was sent twice.
 - #1001 MediaManager: fix *moov atom not found* ffmpeg issue in `VideoHandler`.
 - Fixed the e-mail subject was not transferred when sending an e-mail from customer edit page.
+- Fixed offcanvas problem whith mega sized page builder stories.
+- PayPal: Fixed payment discount problem (discount from a formerly choosen payment method was applied)
 
 
 ## Smartstore 5.1.0

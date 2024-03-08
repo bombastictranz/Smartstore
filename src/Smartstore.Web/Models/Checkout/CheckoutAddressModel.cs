@@ -1,16 +1,28 @@
-﻿using Smartstore.Web.Models.Common;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Smartstore.Web.Models.Common;
 
 namespace Smartstore.Web.Models.Checkout
 {
     public partial class CheckoutAddressModel : ModelBase
     {
-        public List<AddressModel> ExistingAddresses { get; set; } = new();
+        public bool IsShippingRequired { get; set; }
 
+        [ValidateNever]
+        public bool ShippingAddressDiffers { get; set; }
+
+        public bool HasAddresses =>
+            !ExistingAddresses.IsNullOrEmpty();
+
+        public List<AddressModel> ExistingAddresses { get; set; } = [];
         public AddressModel NewAddress { get; set; } = new();
+    }
 
-        /// <summary>
-        /// Used on one-page checkout page
-        /// </summary>
-        public bool NewAddressPreselected { get; set; }
+    public class CheckoutAddressValidator : SmartValidator<CheckoutAddressModel>
+    {
+        public CheckoutAddressValidator(IValidator<AddressModel> addressValidator)
+        {
+            RuleFor(x => x.NewAddress).SetValidator(addressValidator);
+        }
     }
 }

@@ -8,6 +8,15 @@ namespace Smartstore.Core.Checkout.Orders
         public static string CheckoutStateSessionKey => ".Smart.CheckoutState";
 
         /// <summary>
+        /// Gets the object name of the currently selected payment method info.
+        /// The object is stored in HttpContext.Session using this name.
+        /// </summary>
+        /// <remarks>
+        /// The payment info actually belongs in this CheckoutState but for compatibility reasons we leave it as it is.
+        /// </remarks>
+        public static string OrderPaymentInfoName => "OrderPaymentInfo";
+
+        /// <summary>
         /// The payment summary as displayed on the checkout confirmation page.
         /// Set after selecting the payment method, if not skipped by a payment module.
         /// </summary>
@@ -18,8 +27,8 @@ namespace Smartstore.Core.Checkout.Orders
         }
 
         /// <summary>
-        /// Indicates whether a payment is required. <c>false</c> if the order total is 0 (nothing to pay).
-        /// Set on the payment selection page, if not skipped by a payment module.
+        /// Indicates whether payment is required. <c>false</c> if the order total is 0 (nothing to pay).
+        /// Set on the payment selection page if not skipped by a payment module.
         /// </summary>
         public bool IsPaymentRequired
         {

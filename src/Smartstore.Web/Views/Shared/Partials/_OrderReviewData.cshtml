@@ -18,7 +18,8 @@
                 @address.Company
             </div>
             <div class="name">
-                @address.GetFormattedName()
+                <span class="bidi-embed first-name">@address.FirstName</span>
+                <span class="bidi-embed last-name">@address.LastName</span>
             </div>
             <div sm-if="address.StreetAddressEnabled && address.Address1.HasValue()" class="address1">
                 @address.Address1
@@ -106,7 +107,7 @@
                         </div>
                         <p>@Model.ShippingMethod</p>
                     }
-                    @if (Model.PaymentMethod.HasValue() && !Model.IsPaymentSelectionSkipped)
+                    @if (Model.PaymentMethod.HasValue() && Model.IsPaymentRequired)
                     {
                         <div class="row sm-gutters">
                             <div class="col">
